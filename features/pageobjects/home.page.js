@@ -10,143 +10,89 @@ class HomePage extends Page {
      * define selectors using getter methods
      */
     get inputUsername() {
-        return $('#username');
+        return $('#Username');
     }
 
     get inputPassword() {
-        return $('#password');
+        return $('#Password');
     }
 
-    get btnSubmit() {
-        return $('button[type="submit"]');
+    get PsLogo() {
+        return $('img*=PaperSave ID')
     }
 
-    get searchBar() {
-        return $('#twotabsearchtextbox');
+    get signInButton() {
+        return $('#btnLogin')
     }
 
-    get searchButton(){
-        return $('#nav-search-submit-button');
+    get saveButton() {
+        return $('#workflownavigationmenuforblackbaud')
     }
 
-    get ourBrands(){
-        return $("//span[text()='Our Brands']/preceding-sibling::div/label/i");
+    get chooseStepButton() {
+        return $('#workflowStateName')
     }
 
-    get add_to_cart(){
-        return $('#add-to-cart-button');
+    get chooseStepDataEntry() {
+        return $("//ul[@role='menu']//*[text()='Data Entry']")
     }
 
-    get cartCount(){
-        return $('#nav-cart-count');
+    get chooseStepEnter() {
+        return $("//ul[@role='menu']//*[text()='Entered']")
     }
 
-    get googleSearchBar() {
-        return $("//input[@name='q']");
+    get downloadButton() {
+        return $('#btnGridToolbardownload')
     }
 
-    get udemySearchBar(){
-        return $('//*[@name="q"]');
-    }
-
-    get sort_dropdown(){
-        return $("//*[@form='filter-form']");
-    }
-
-    get first_course(){
-        return $$("//div[@class='popper--popper--2r2To']//a[contains(@class, 'udlite-custom-focus')]")[0]
-    }
-
-    get previewCourseText(){
-        return $('span=Preview this course');
-    }
-
-    get highestRatedCourse(){
-        return $('span=Highest Rated');
-    }
-
-    get udemyPage(){
-        return $("//body[@id='udemy']")
-    }
 
     /**
      * a method to encapsule automation code to interact with the page
      * e.g. to login using username and password
      */
-    async login (username, password) {
+
+    async openPairSoftHomePage(){
+           await browser.url("https://psservices.app.cloud.papersave.com/workflow");
+           await expect(this.inputUsername).toBeEnabled();
+    }
+
+    async performLogin (username, password) {
         await this.inputUsername.setValue(username);
         await this.inputPassword.setValue(password);
-        await this.btnSubmit.click();
+        await this.signInButton.click();
+        await expect(this.saveButton).toBeDisplayed();
+        browser.pause(10000);
     }
 
-    async searchForCategory(category) {
-        await this.searchBar.setValue(category);
+    async selectChooseStep(){
+        await this.chooseStepButton.click();
+        await expect(this.chooseStepEnter).toBeDisplayed();
+        await this.chooseStepEnter.click();
+        browser.pause(5000);
     }
 
-    async clickSearchButton(){
-        await this.searchButton.click();
+    async selectRow(row){
+        const checkbox= $$("//*[@class='e-checkselectall']")[row+1];
+        checkbox.click();
     }
 
-    async selectCategory(brand){
-        await this.ourBrands.scrollIntoView();
-        await this.ourBrands.click();
+    async HoverOverAndClickDownload(){
+        await expect(this.downloadButton).toBeDisplayed();
+        await this.downloadButton.moveTo();
+        await this.downloadButton.click();
+        browser.pause(5000);
     }
 
-    async selectProduct(product){
-        const link = await $('='+product);
-        link.click();
-    }
-
-    async clickOnAddToCartButton(button_name){
-       await this.add_to_cart.click();
-    }
-
-    async validateCartCount(count) {
-        await expect(this.cartCount).toHaveText(count);
-    }
-
-    async searchGooglePage(searchText) {
-        await this.googleSearchBar.setValue(searchText);
-        await browser.keys('Enter');
-    }
-
-    async openGoogle(path) {
-        await browser.url('https://www.google.com')
-    }
-
-    async openAmazon(path) {
-        await browser.url('https://www.amazon.com')
-    }
-
-    async closeBrowser(){
-        await browser.closeWindow();
-    }
-
-    async openLinkContainingText(link_text){
-        const link = await $('*='+link_text);
-        link.click();
-    }
-
-    async validateWebPage(link_text) {
-        await expect(this.udemyPage).toBeDisplayed();
-    }
-
-    async searchForCourse() {
-        await this.udemySearchBar.setValue("BDD with Cucumber");
-        await browser.keys('Enter');
-    }
-
-    async sortCourseAndSelectfirst(sort_option) {
-        await this.sort_dropdown.selectByVisibleText(sort_option);
-        await this.first_course.click();
-    }
-
-    async validatCoursePreviewPageDisplayed(){
-        await expect(this.previewCourseText).toBeDisplayed();
-    }
-
-    async validateHighestRatedCourse(){
-        await expect(this.highestRatedCourse).toBeDisplayed();
+    async printValuesForSelectedRow(row){
+        await expect($$("//*[@role='columnheader']//*[@class='e-headertext']")).toBeDisplayed();
+        const columnValues = $$("//*[@role='columnheader']//*[@class='e-headertext']");
+        const visibleCoulmn = new Array();
+        columnValues.forEach(element => {
+            if(element.isDisplayed() == true) {
+                visibleCoulmn.push(element.getText())
+            }
+        });
+       console.log(visibleCoulmn);
     }
 }
 
